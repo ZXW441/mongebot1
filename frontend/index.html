@@ -1,140 +1,32 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<title>MongeBot Ultra Pro — Auth & Admin</title>
-<style>
-:root{
-  --primary:#2563eb;
-  --primary-hover:#1d4ed8;
-  --secondary:#16a34a;
-  --bg:#0b1220;
-  --bg2:#111827;
-  --text:#e2e8f0;
-  --accent:#38bdf8;
-}
-*{box-sizing:border-box}
-body{font-family:Inter, "Segoe UI", sans-serif; margin:0; height:100vh; background:linear-gradient(135deg,var(--bg2),#0f172a); color:var(--text); display:flex; align-items:stretch;}
-/* --- AUTH MODAL --- */
-#authWrapper{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.6); z-index:60;}
-.authCard{width:880px; max-width:95%; display:grid; grid-template-columns:320px 1fr; gap:20px; padding:20px; border-radius:14px; background:linear-gradient(180deg,#091026,#0f172a); box-shadow:0 10px 40px rgba(2,6,23,0.7);}
-.authLeft{display:flex; flex-direction:column; gap:12px; align-items:center; padding:10px;}
-.brand{font-size:20px; color:var(--accent); font-weight:700;}
-.defaultAvatar{width:86px;height:86px;border-radius:12px;object-fit:cover;border:2px solid rgba(255,255,255,0.06);}
-.tabBtns{display:flex; gap:8px; margin-top:6px;}
-.tabBtns button{padding:8px 12px;border-radius:10px;border:none;background:#0b1220;color:var(--text);cursor:pointer;}
-.tabBtns button.active{background:var(--accent); color:#071326;}
-.small{font-size:13px;color:#9fb0c8;}
-.authRight{padding:6px 12px;}
-.formRow{display:flex; gap:8px; margin-bottom:10px;}
-.formGroup{flex:1; display:flex; flex-direction:column; gap:6px;}
-.formGroup input{padding:10px;border-radius:8px;border:1px solid #1f2a38;background:#071126;color:var(--text); outline:none;}
-.authFooter{display:flex; justify-content:space-between; align-items:center; margin-top:4px;}
-.btnPrimary{background:var(--primary); color:white; border:none; padding:10px 14px; border-radius:10px; cursor:pointer;}
-.btnSecondary{background:#0b1220;color:var(--text);border:1px solid #1f2a38;padding:8px 12px;border-radius:10px;cursor:pointer;}
-.link{color:var(--accent); cursor:pointer; text-decoration:underline; font-size:13px;}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MongeBot</title>
 </head>
 <body>
+<h1>Bienvenue sur MongeBot</h1>
 
-<!-- AUTH -->
-<div id="authWrapper">
-  <div class="authCard">
-    <div class="authLeft">
-      <div class="brand">MongeBot Ultra Pro</div>
-      <img id="authAvatarPreview" class="defaultAvatar" src="" alt="avatar">
-      <div class="small">Bienvenue — crée ton compte ou connecte-toi.</div>
-      <div style="width:100%;margin-top:8px">
-        <div class="tabBtns">
-          <button id="tabSignUp" class="active">Sign up</button>
-          <button id="tabLogin">Login</button>
-        </div>
-      </div>
-      <div style="width:100%;margin-top:6px">
-        <input id="authUpload" type="file" accept="image/*" style="width:100%;"/>
-      </div>
-    </div>
-
-    <div class="authRight">
-      <!-- SIGN UP FORM -->
-      <div id="signupForm">
-        <div class="formRow">
-          <div class="formGroup"><label>Prénom</label><input id="suFirst" placeholder="Prénom"></div>
-          <div class="formGroup"><label>Nom</label><input id="suLast" placeholder="Nom"></div>
-        </div>
-        <div class="formRow">
-          <div class="formGroup"><label>Nom d'utilisateur</label><input id="suUsername" placeholder="Nom d'utilisateur"></div>
-          <div class="formGroup"><label>Mot de passe</label><input id="suPassword" type="password" placeholder="Mot de passe"></div>
-        </div>
-        <div class="authFooter">
-          <div class="small">Inscription via serveur</div>
-          <div>
-            <button id="doSignUp" class="btnPrimary">S'inscrire</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- LOGIN FORM -->
-      <div id="loginForm" style="display:none">
-        <div class="formRow">
-          <div class="formGroup"><label>Nom d'utilisateur</label><input id="liUsername" placeholder="Nom d'utilisateur"></div>
-          <div class="formGroup"><label>Mot de passe</label><input id="liPassword" type="password" placeholder="Mot de passe"></div>
-        </div>
-        <div class="authFooter">
-          <div class="small"></div>
-          <div>
-            <button id="doLogin" class="btnPrimary">Se connecter</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
+<form id="registerForm">
+  <input type="text" id="username" placeholder="Username" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button type="submit">S’inscrire</button>
+</form>
 
 <script>
-const tabSignUp = document.getElementById('tabSignUp');
-const tabLogin = document.getElementById('tabLogin');
-const signupForm = document.getElementById('signupForm');
-const loginForm = document.getElementById('loginForm');
-const doSignUp = document.getElementById('doSignUp');
-const doLogin = document.getElementById('doLogin');
+document.getElementById('registerForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
-tabSignUp.onclick = ()=>{ tabSignUp.classList.add('active'); tabLogin.classList.remove('active'); signupForm.style.display='block'; loginForm.style.display='none'; };
-tabLogin.onclick = ()=>{ tabLogin.classList.add('active'); tabSignUp.classList.remove('active'); signupForm.style.display='none'; loginForm.style.display='block'; };
-
-// Signup
-doSignUp.addEventListener('click', async ()=>{
-  const username = document.getElementById('suUsername').value.trim();
-  const password = document.getElementById('suPassword').value;
-  const first = document.getElementById('suFirst').value.trim();
-  const last = document.getElementById('suLast').value.trim();
-  if(!username||!password||!first){ alert('Remplis tous les champs'); return; }
-
-  const res = await fetch('/api/signup',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({username,password,first,last})
+  const res = await fetch('/api/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
   });
   const data = await res.json();
-  if(data.error) alert(data.error);
-  else { alert('Inscription réussie'); tabLogin.click(); document.getElementById('liUsername').value = username; }
-});
-
-// Login
-doLogin.addEventListener('click', async ()=>{
-  const username = document.getElementById('liUsername').value.trim();
-  const password = document.getElementById('liPassword').value;
-  if(!username||!password){ alert('Remplis tous les champs'); return; }
-
-  const res = await fetch('/api/login',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({username,password})
-  });
-  const data = await res.json();
-  if(data.error) alert(data.error);
-  else alert('Connecté ! Bonjour '+data.username);
+  alert(data.success ? 'Utilisateur ajouté !' : data.error);
 });
 </script>
 </body>

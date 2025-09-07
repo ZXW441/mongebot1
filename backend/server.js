@@ -1,81 +1,50 @@
 const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcrypt');
 const fs = require('fs-extra');
 const path = require('path');
-const cors = require('cors');
-const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.json());
 
-// DB path
-const DB_PATH = path.join(__dirname, 'db.json');
+// Chemin vers la base de données
+const dbPath = path.join(__dirname, 'db.json');
 
-// Initial DB
-if(!fs.existsSync(DB_PATH)){
-    fs.writeJsonSync(DB_PATH, {users:[], chats:[]}, {spaces:2});
-}
-
-// Helpers
-function loadDB(){ return fs.readJsonSync(DB_PATH); }
-function saveDB(data){ fs.writeJsonSync(DB_PATH, data, {spaces:2}); }
-
-// --- API ROUTES ---
-
-// Signup
-app.post('/api/signup', (req,res)=>{
-    const {username,password,first,last} = req.body;
-    if(!username || !password || !first) return res.json({error:'Champs requis manquants'});
-    
-    const db = loadDB();
-    if(db.users.find(u => u.username.toLowerCase()===username.toLowerCase()))
-        return res.json({error:'Nom d\'utilisateur déjà pris'});
-    
-    db.users.push({username,password,first,last,role:'user',avatar:'',mustChangePassword:false,blocked:false});
-    saveDB(db);
-    return res.json({success:true,username});
+// GET /api/data => récupère toutes les données
+app.get('/api/data', async (req, res) => {
+  try {
+    const data = await fs.readJson(dbPath);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Impossible de lire la base de données.' });
+  }
 });
 
-// Login
-app.post('/api/login',(req,res)=>{
-    const {username,password} = req.body;
-    if(!username||!password) return res.json({error:'Champs requis manquants'});
-    const db = loadDB();
-    const user = db.users.find(u=>u.username.toLowerCase()===username.toLowerCase());
-    if(!user) return res.json({error:'Utilisateur non trouvé'});
-    if(user.password!==password) return res.json({error:'Mot de passe incorrect'});
-    res.json({username:user.username,role:user.role});
-});
+// POST /api/add => ajoute un utilisateur avec mot de passe hashé
+app.post('/api/add', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Données manquantes.' });
 
-// Get all chats
-app.get('/api/chats', (req,res)=>{
-    const db = loadDB();
-    res.json(db.chats || []);
-});
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const db = await fs.readJson(dbPath);
 
-// Add message to chat
-app.post('/api/chats/:chatName/messages', (req,res)=>{
-    const {chatName} = req.params;
-    const {who,text,avatar} = req.body;
-    if(!text || !who) return res.json({error:'Message invalide'});
-    const db = loadDB();
-    let chat = db.chats.find(c=>c.name===chatName);
-    if(!chat){
-        chat = {name:chatName,messages:[]};
-        db.chats.push(chat);
-    }
-    chat.messages.push({who,text,avatar});
-    saveDB(db);
-    res.json({success:true});
+    db.users = db.users || [];
+    db.users.push({ username, password: hashedPassword });
+
+    await fs.writeJson(dbPath, db, { spaces: 2 });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Impossible d’ajouter l’utilisateur.' });
+  }
 });
 
 // Serve frontend
-app.get('*', (req,res)=>{
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-app.listen(PORT, ()=>console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
