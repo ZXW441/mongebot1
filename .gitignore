@@ -1,0 +1,47 @@
+# Node.js modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for instrumented libs
+coverage/
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+.env
+
+# Build output
+dist/
+build/
+
+# Database file
+db.json
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package lock (optional, if you don't want to commit)
+package-lock.json
